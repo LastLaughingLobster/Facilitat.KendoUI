@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/6.6.0/default/default-main.css" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2023.2.718/js/jszip.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2023.2.718/js/kendo.all.min.js"></script>
+</head>
+
+<body>
+    <div id="sign-in-page">
+        <div id="sign-in-wrapper">
+            <div id="logo-wrapper">
+                <div id="logo">
+                    <img src="./Content/images/signin-logo.svg"></img>
+                </div>
+                <div id='banner'>
+                    Sign In
+                </div>
+                <div id="account">
+                    Don't have an account? <a href="signup.html">Sign up</a>
+                </div>
+            </div>
+            <div id="inputs-wrapper">
+                <form id="login"></form>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import authService from './js/services/authService.js';
+    
+        $(document).ready(function () {
+            $("#login").kendoForm({
+                grid: {
+                    cols: 1,
+                    gutter: 5
+                },
+                buttonsTemplate: "<button type='submit' class='k-button k-button-md k-button-rectangle k-rounded-md k-button-solid k-button-solid-base'>Sign In</button>",
+                formData: {
+                    Email: "",
+                    Password: "",
+                    RememberMe: false
+                },
+                items: [
+                    {
+                        field: "Email",
+                        label: "",
+                        attributes: {
+                            placeholder: "Email",
+                            required: true
+                        }
+                    },
+                    {
+                        field: "Password",
+                        label: "",
+                        attributes: {
+                            type: "password",
+                            required: true
+                        }
+                    },
+                    {
+                        field: "RememberMe",
+                        label: "Remember Me",
+                        attributes: {
+                            type: "checkbox"
+                        }
+                    }
+                ],
+                submit: function(e) {
+                    e.preventDefault();
+                    var formModel = e.model;
+                    authService.login(formModel.Email, formModel.Password)
+                        .then(response => {
+                            localStorage.setItem('jwt_token', response.token);
+                            window.location.href = 'index.html';
+                        })
+                        .catch(error => {
+                            console.error('Login error:', error);
+                            // Handle error, e.g., show error message
+                        });
+                }
+            });
+    
+            $("#Password").parent().append("<span class='k-icon k-i-preview'></span>");
+            $(".k-i-preview").mousedown(function () {
+                $("#Password").attr("type", "text");
+            });
+            $(".k-i-preview").mouseup(function () {
+                $("#Password").attr("type", "password");
+            });
+        });
+    </script>    
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Roboto;
+            font-style: normal;
+            font-weight: normal;
+        }
+
+        span.k-textbox {
+            width: 100%;
+        }
+
+        .k-icon.k-i-preview {
+            z-index: 10;
+            position: absolute;
+            bottom: 2px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            color: gray;
+        }
+
+        #logo-wrapper {
+            height: 370px;
+            width: 270px;
+
+        }
+
+        #logo {
+            height: 186px;
+            width: 270px;
+        }
+
+        #banner {
+            height: 68px;
+            color: #2727BE;
+            font-weight: 300;
+            font-size: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        #account {
+            position: relative;
+            height: 20px;
+            left: 31.5px;
+            margin: 32px 0px 32px 0px;
+            font-size: 14px;
+
+        }
+
+        #account>a {
+            margin-left: 16px;
+            color: #0058E9;
+        }
+
+        #continue-with-wrapper {
+            display: inline-flex;
+            height: 20px;
+            width: 270px;
+            margin-bottom: 16px;
+            margin-top: 16px;
+
+        }
+
+        #continue-with-wrapper>span {
+            position: static;
+            color: #8F8F8F;
+            font-size: 14px;
+            line-height: 20px;
+
+        }
+
+        hr {
+            width: 75px;
+            height: 0px;
+            border: 1px solid #8F8F8F;
+        }
+
+        #sign-in-page {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #FFFFFF; /* Changed from gradient to white */
+        }
+
+        #sign-in-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 45%;
+            z-index: 1;
+            border: 1px solid #D0D0D0; /* Added edge */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added shadow */
+            overflow: hidden; /* Ensures no content spills out */
+        }
+
+        #login {
+            height: 202px;
+            width: 270px;
+            justify-content: space-between;
+            display: flex;
+            flex-flow: column;
+            padding-bottom: 20px; /* Adds padding at the bottom of the form */
+        }
+
+        div.k-form-field:nth-child(3) {
+            display: flex;
+        }
+
+        #RememberMe-form-label {
+            order: 1;
+            padding-left: 0.5em;
+        }
+
+        .k-form-field-wrap {
+            position: relative;
+        }
+
+        .k-button,
+        .k-button:hover {
+            height: 30px;
+            width: 270px;
+            background: #FF6358;
+            color: #FFFFFF;
+        }
+
+        /* This did not work at */
+        .k-button-sign-in {
+            padding-bottom: 10px;
+        }
+
+
+        #social-wrapper {
+            display: flex;
+            width: 194px;
+            height: 30px;
+            top: 755px;
+            left: 183px;
+
+        }
+
+        #wave {
+            width: 100vw;
+        }
+    </style>
+</body>
+
+</html>
