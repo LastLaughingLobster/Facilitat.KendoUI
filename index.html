@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Dashboard</title>
+    <title>Facilitat</title>
     <link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/6.6.0/default/default-main.css" />
 
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
@@ -76,7 +76,7 @@
                 var aboutTitle = $(".aboutPage").text();
                 $("div.appTitle").text(aboutTitle);
                 $("main").load("about.html");
-                document.title = aboutTitle + " - AdminDashboard";
+                document.title = aboutTitle + " - Facilitat";
             });
 
             var drawer = $("#drawer").kendoDrawer({
@@ -97,7 +97,7 @@
                         e.sender.drawerContainer.find("#drawer-content > main").empty();
                         $("main").load(tabName + ".html");
 
-                        document.title = titleName + " - AdminDashboard";
+                        document.title = titleName + " - Facilitat";
                         $("div.appTitle").text(titleName);
 
                         if ($("div.appTitle").text() === "Dashboard") {
@@ -124,7 +124,7 @@
                     </div>");
             drawer.drawerWrapper.prepend(userContentTemplate);
 
-            document.title = $("div.appTitle").text(); + " - AdminDashboard";
+            document.title = $("div.appTitle").text(); + " - Facilitat";
 
             $("#appbar").kendoPopover({
                 showOn: "click",

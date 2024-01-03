@@ -14,7 +14,6 @@ const authService = {
     },
     register: function(user) {
         const userDto = new UserDTO(user.firstName, user.lastName, user.email, user.document, user.password);
-        console.log(userDto);
         return $.ajax({
             url: API_CONFIG.BASE_URL + API_CONFIG.REGISTER_ENDPOINT,
             method: 'POST',

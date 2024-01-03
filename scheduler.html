@@ -13,121 +13,185 @@
   </div>
 </script>
 
-<script>
-  var sampleDataNextID = schedulerTasks.length + 1;
-
-  function getIndexById(id) {
-      var idx,
-          l = schedulerTasks.length;
-
-      for (var j = 0; j < l; j++) {
-          if (schedulerTasks[j].id == id) {
-              return j;
-          }
-      }
-      return null;
-  }
+<script type="module">
+  import schedulerService from './js/services/schedulerService.js';
+  import ScheduleOrderDTO from './js/dtos/ScheduleOrderDTO.js'
 
   $(function () {
-      var dataSource = new kendo.data.SchedulerDataSource({
-          transport: {
-              read: function (e) {
-                  e.success(schedulerTasks);
-              },
-              create: function (e) {
-                  e.data.id = sampleDataNextID++;
-                  schedulerTasks.push(e.data);
-                  e.success(e.data);
-              },
-              update: function (e) {
-                  schedulerTasks[getIndexById(e.data.id)] = e.data;
-                  e.success();
-              },
-              destroy: function (e) {
-                  schedulerTasks.splice(getIndexById(e.data.id), 1);
-                  e.success();
-              }
-          },
-          error: function (e) {
-              alert("Status: " + e.status + "; Error message: " + e.errorThrown);
-          },
-          batch: false,
-          schema: {
-              model: {
-                  id: "id",
-                  fields: {
-                      id: { type: "number" },
-                      title: { field: "title", defaultValue: "No title", validation: { required: true } },
-                      start: { type: "date", field: "start" },
-                      end: { type: "date", field: "end" },
-                      description: { field: "description" },
-                      recurrenceRule: { from: "recurrenceRule" },
-                      recurrenceException: { from: "recurrenceException" },
-                      attendee: { field: "attendee", defaultValue: 1 },
-                      isAllDay: { type: "boolean", field: "isAllDay" },
-                      image: { from: "image", defaultValue: "", },
-                  }
-              }
+    var dataSource = new kendo.data.SchedulerDataSource({
+      transport: {
+        read: function (e) {
+          schedulerService.getAllSchedulesByUser(2) // Replace '2' with the actual user ID
+            .done(function (data) {
+              var transformedData = data.map(function (item) {
+                return {
+                  id: item.id,
+                  title: item.title,
+                  image: "./Content/images/clock.png",
+                  start: new Date(item.start),
+                  end: new Date(item.end),
+                  description: item.description,
+                  isAllDay: item.isAllDay,
+                  attendee: 2
+                };
+              });
+              console.log(transformedData);
+              e.success(transformedData);
+            })
+            .fail(function (error) {
+              e.error(error);
+              console.error("Error fetching schedules: ", error);
+            });
+        },
+        create: function (e) {
+          var scheduleData = e.data;
+          var scheduleOrderDTO = new ScheduleOrderDTO(
+            scheduleData.id,
+            5,
+            2, //Change this to current user id. 
+            scheduleData.title,
+            scheduleData.start,
+            scheduleData.end,
+            scheduleData.description,
+            scheduleData.recurrenceRule,
+            scheduleData.recurrenceException,
+            scheduleData.isAllDay,
+            0
+          );
+
+          schedulerService.createSchedule(scheduleOrderDTO)
+            .done(function (response) {
+              // Handle successful creation
+              e.success();
+            })
+            .fail(function (error) {
+
+              console.error("Error fetching schedules: ", error);
+              console.log("Full error object:", error);
+
+            });
+        },
+        update: function (e) {
+          var scheduleData = e.data;
+          var scheduleOrderDTO = new ScheduleOrderDTO(
+            scheduleData.id,
+            5,
+            2, //Change this to current user id. 
+            scheduleData.title,
+            scheduleData.start,
+            scheduleData.end,
+            scheduleData.description,
+            scheduleData.recurrenceRule,
+            scheduleData.recurrenceException,
+            scheduleData.isAllDay,
+            0
+          );
+
+          schedulerService.updateSchedule(scheduleOrderDTO)
+            .done(function (response) {
+              // Handle successful creation
+              e.success();
+            })
+            .fail(function (error) {
+
+              console.error("Error fetching schedules: ", error);
+              console.log("Full error object:", error);
+
+            });
+
+        },
+        destroy: function (e) {
+          const scheduleData = e.data;
+          schedulerService.deleteSchedule(scheduleData.id)
+            .done(function (data) {
+              e.success();
+            })
+            .fail(function (error) {
+              e.error(error);
+              console.error("Error fetching schedules: ", error);
+            });
+        }
+      },
+      error: function (e) {
+        alert("Status: " + e.status + "; Error message: " + e.errorThrown);
+      },
+      batch: false,
+      schema: {
+        model: {
+          id: "id",
+          fields: {
+            id: { type: "number" },
+            title: { field: "title", defaultValue: "No title", validation: { required: true } },
+            start: { type: "date", field: "start" },
+            end: { type: "date", field: "end" },
+            description: { field: "description" },
+            recurrenceRule: { from: "recurrenceRule" },
+            recurrenceException: { from: "recurrenceException" },
+            attendee: { field: "attendee", defaultValue: 2 },
+            isAllDay: { type: "boolean", field: "isAllDay" },
+            image: { from: "image", defaultValue: "", },
           }
-      });
+        }
+      }
+    });
 
-      $("#scheduler").kendoScheduler({
-          date: new Date("2020/10/4"),
-          startTime: new Date("2020/10/4 7:00"),
-          endTime: new Date("2020/10/4 20:00"),
-          height: 600,
-          views: [
-              "day",
-              { type: "week", selected: true },
-              "workWeek",
-              "month",
-              "agenda",
-          ],
-          timezone: "Etc/UTC",
-          eventTemplate: $("#event-template").html(),
-          dataSource: dataSource,
-          resources: [
-              {
-                  field: "attendee",
-                  dataSource: [
-                      { text: "Jason", value: 1, color: "#eaf8ff" },
-                      { text: "Maddie", value: 2, color: "#fdfdf4" }
-                  ]
-              }
+    $("#scheduler").kendoScheduler({
+      date: new Date("2023/5/15"),
+      startTime: new Date("2023/5/15 7:00"),
+      endTime: new Date("2023/5/15 20:00"),
+      height: 600,
+      views: [
+        "day",
+        { type: "week", selected: true },
+        "workWeek",
+        "month",
+        "agenda",
+      ],
+      timezone: "Etc/UTC",
+      eventTemplate: $("#event-template").html(),
+      dataSource: dataSource,
+      resources: [
+        {
+          field: "attendee",
+          dataSource: [
+            { text: "Jason", value: 2, color: "#eaf8ff" },
+            { text: "Maddie", value: 2, color: "#fdfdf4" }
           ]
+        }
+      ]
 
-      });
+    });
   });
 </script>
 
 <style>
   .template-container {
-      margin-top: -8px;
+    margin-top: -8px;
   }
 
   .template-container img {
-      float: left;
-      margin: 0 4px;
-      margin-right: 10px;
+    float: left;
+    margin: 0 4px;
+    margin-right: 10px;
   }
 
   .template-container h3 {
-      padding: 0 4px 4px;
-      font-size: 12px;
-      font-weight: 400;
-      margin-right: 14px;
+    padding: 0 4px 4px;
+    font-size: 12px;
+    font-weight: 400;
+    margin-right: 14px;
   }
 
   .template-title-1 {
-      color: #65CCFF;
+    color: #65CCFF;
   }
 
   .template-title-2 {
-      color: #D0D03B;
+    color: #D0D03B;
   }
 
   .k-event .k-i-reload,
   .k-event .k-i-non-recurrence {
-      display: none;
+    display: none;
   }
 </style>
